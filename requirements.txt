@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+celery
+redis
+pandas
+nltk
+vaderSentiment
+wordcloud
+matplotlib
+python-dotenv
