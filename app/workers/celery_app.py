@@ -14,4 +14,10 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    beat_schedule={
+        "process-batch-every-3-seconds": {
+            "task": "app.workers.tasks.process_batch",
+            "schedule": 3.0,
+        },
+    },
 )
