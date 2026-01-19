@@ -1,10 +1,12 @@
-from fastapi import FastAPI
+import time
 import json
 import uuid
 
+from fastapi import FastAPI
 from app.cache.redis_client import redis_client
 from app.cache.cache_utils import make_cache_key
 from app.workers.tasks import process_batch
+from app.metrics.metrics import incr
 
 app = FastAPI()
 
@@ -13,28 +15,51 @@ BATCH_QUEUE_KEY = "analysis_batch_queue"
 
 @app.post("/analyze")
 def analyze(payload: dict):
-    cache_key = make_cache_key(payload)
+    start_time = time.time()
 
+    cache_key = make_cache_key(payload)
     cached = redis_client.get(cache_key)
+
     if cached:
+        incr("metrics:cache_hits")
+
+        latency_ms = int((time.time() - start_time) * 1000)
         return {
             "status": "cached",
+            "latency_ms": latency_ms,
             "result": json.loads(cached),
         }
 
+    incr("metrics:cache_misses")
+
     request_id = str(uuid.uuid4())
-    item = {
-        "request_id": request_id,
-        "payload": payload,
-    }
+    redis_client.rpush(
+        BATCH_QUEUE_KEY,
+        json.dumps({"request_id": request_id, "payload": payload}),
+    )
 
-    redis_client.rpush(BATCH_QUEUE_KEY, json.dumps(item))
+    incr("metrics:tasks_enqueued")
 
-    queue_length = redis_client.llen(BATCH_QUEUE_KEY)
-    if queue_length >= 5:
+    if redis_client.llen(BATCH_QUEUE_KEY) >= 5:
         process_batch.delay()
 
+    latency_ms = int((time.time() - start_time) * 1000)
     return {
-        "status": "queued_for_batch",
+        "status": "queued",
         "request_id": request_id,
+        "latency_ms": latency_ms,
+    }
+
+from app.metrics.metrics import get
+
+@app.get("/metrics")
+def metrics():
+    return {
+        "cache_hits": get("metrics:cache_hits"),
+        "cache_misses": get("metrics:cache_misses"),
+        "tasks_enqueued": get("metrics:tasks_enqueued"),
+        "batches_processed": get("metrics:batches_processed"),
+        "avg_batch_size": (
+            get("metrics:batch_size_total") / max(get("metrics:batches_processed"), 1)
+        ),
     }
