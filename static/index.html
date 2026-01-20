@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝕏 Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="x-logo">𝕏</div>
+                <h1 class="title">Analytics</h1>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="topicInput" class="search-input"
+                    placeholder="Search topics, keywords, or handles..." autocomplete="off">
+                <button id="analyzeBtn" class="analyze-btn">
+                    <span class="btn-text">Analyze</span>
+                    <span class="btn-loader" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Trending pills -->
+            <div class="trending-container">
+                <button class="trend-pill" data-topic="AI">#AI</button>
+                <button class="trend-pill" data-topic="Crypto">#Crypto</button>
+                <button class="trend-pill" data-topic="Memecoins">#Memecoins</button>
+                <button class="trend-pill" data-topic="ElonMusk">#ElonMusk</button>
+                <button class="trend-pill" data-topic="Tesla">#Tesla</button>
+                <button class="trend-pill" data-topic="SpaceX">#SpaceX</button>
+                <button class="trend-pill" data-topic="X">#X</button>
+                <button class="trend-pill more-btn">→</button>
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>Enter a topic to see what 𝕏 is saying right now</h3>
+            <p>Analyze trends, sentiment, and conversations in real-time</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state" style="display: none;">
+            <div class="skeleton-container">
+                <div class="skeleton-metrics">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div class="skeleton-charts">
+                    <div class="skeleton-chart"></div>
+                    <div class="skeleton-chart"></div>
+                </div>
+            </div>
+            <p class="loading-text">Analyzing conversations...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <div class="error-content">
+                <span class="error-icon">⚠️</span>
+                <div>
+                    <h3>Analysis failed</h3>
+                    <p id="errorMessage">Something went wrong. Please try again.</p>
+                </div>
+                <button id="retryBtn" class="retry-btn">Retry</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <!-- Key Metrics Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Total Posts</span>
+                        <span class="trend-up">↑</span>
+                    </div>
+                    <div class="metric-value" id="totalPosts">1,254,389</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Positive %</span>
+                        <span class="trend-up">↑</span>
+                    </div>
+                    <div class="metric-value positive" id="positivePercent">38.5%</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Neutral %</span>
+                        <span class="trend-neutral">→</span>
+                    </div>
+                    <div class="metric-value neutral" id="neutralPercent">42.1%</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Negative %</span>
+                        <span class="trend-down">↓</span>
+                    </div>
+                    <div class="metric-value negative" id="negativePercent">19.4%</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <!-- Sentiment Chart -->
+                <div class="chart-card">
+                    <h3 class="card-title">Sentiment Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Word Cloud -->
+                <div class="chart-card">
+                    <h3 class="card-title">Top Keywords</h3>
+                    <div id="wordCloud" class="word-cloud"></div>
+                </div>
+            </div>
+
+            <!-- Keywords Table -->
+            <div class="table-card">
+                <h3 class="card-title">Keyword Rankings</h3>
+                <div class="table-wrapper">
+                    <table class="keywords-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Keyword</th>
+                                <th>Total Posts</th>
+                                <th>Sentiment Score</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keywordsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
