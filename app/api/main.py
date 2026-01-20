@@ -3,12 +3,26 @@ import json
 import uuid
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from app.cache.redis_client import redis_client
 from app.cache.cache_utils import make_cache_key
 from app.workers.tasks import process_batch
 from app.metrics.metrics import incr
 
 app = FastAPI()
+
+# CORS middleware for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 BATCH_QUEUE_KEY = "analysis_batch_queue"
 
