@@ -14,10 +14,6 @@ The primary objective of this project was to create a scalable architecture for 
 * Optimize resource consumption and API costs through intelligent caching and multi-stage data processing.
 
 
-## Data Integration Constraints
-
-While the platform is fully configured for live data, the integration of real-time search results currently falls back to high-fidelity simulated data due to provider-side limitations. The SocialData.tools search endpoint was recently deprecated following broad policy changes across the X data ecosystem. Although the account and authentication are verified and active, the specific search API path remains restricted by the provider. The codebase is designed to instantly switch to live data once the provider restores access or provides an updated API path.
-
 ## Main Implementations
 
 * **Asynchronous Pipeline**: Built a FastAPI backend that offloads heavy data processing to Celery workers, allowing for immediate request acknowledgement and background batch processing.
@@ -26,6 +22,11 @@ While the platform is fully configured for live data, the integration of real-ti
 * **Sentiment & Linguistic Analysis**: Integrated specialized modules for calculating sentiment scores and extracting word frequencies from large batches of social posts.
 * **Premium User Interface**: Designed a responsive, dark-mode dashboard using Vanilla CSS, featuring interactive Chart.js visualizations and dynamic search state management.
 * **Metrics & Monitoring**: Established an internal telemetry system to track cache performance, worker throughput, and batch efficiency across the stack.
+
+
+## Data Integration Constraints
+
+While the platform is fully configured for live data, the integration of real-time search results currently falls back to high-fidelity simulated data due to provider-side limitations. The SocialData.tools search endpoint was recently deprecated following broad policy changes across the X data ecosystem. Although the account and authentication are verified and active, the specific search API path remains restricted by the provider. The codebase is designed to instantly switch to live data once the provider restores access or provides an updated API path.
 
 ## Why the Official Twitter API was not used
 
