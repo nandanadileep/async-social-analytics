@@ -33,7 +33,25 @@ def process_batch():
         payload = entry["payload"]
         topic = payload["topic"]
 
-        posts = generate_mock_posts(topic, count=120)
+        # Try to fetch real data from Twitter adapter
+        try:
+            import asyncio
+            from app.adapters.factory import get_adapter
+            
+            # Create Twitter adapter
+            adapter = get_adapter('twitter')
+            
+            # Fetch posts asynchronously
+            social_posts = asyncio.run(adapter.fetch_posts(topic, max_results=120))
+            
+            # Extract text from SocialPost objects
+            posts = [post.text for post in social_posts]
+            
+            print(f"✅ Fetched {len(posts)} posts from Twitter adapter for topic: {topic}")
+        except Exception as e:
+            # Fallback to mock data if adapter fails
+            print(f"⚠️ Adapter failed, using mock data: {e}")
+            posts = generate_mock_posts(topic, count=120)
 
         sentiment = analyze_sentiments(posts)
         word_freq = extract_word_frequencies(posts)
@@ -55,6 +73,12 @@ def process_batch():
 
 
 def generate_mock_posts(topic, count=100):
+    """
+    Generate mock posts for testing.
+    
+    In production, this is replaced by the adapter system.
+    Use fetch_posts_from_adapter() for real data.
+    """
     return [
         f"{topic} is amazing for developers #{i}"
         if i % 3 == 0
@@ -63,3 +87,31 @@ def generate_mock_posts(topic, count=100):
         else f"{topic} is overhyped and risky #{i}"
         for i in range(count)
     ]
+
+
+async def fetch_posts_from_adapter(topic: str, count: int = 100, platform: str = "twitter"):
+    """
+    Fetch real posts using the adapter system.
+    
+    Args:
+        topic: Topic/hashtag to search for
+        count: Number of posts to fetch
+        platform: Social media platform ('twitter', 'reddit', etc.)
+        
+    Returns:
+        List of post texts
+        
+    Example:
+        To switch to real Twitter data, replace generate_mock_posts() 
+        with this function in process_batch().
+    """
+    from app.adapters.factory import get_adapter
+    
+    # Create adapter instance
+    adapter = get_adapter(platform)
+    
+    # Fetch posts
+    posts = await adapter.fetch_posts(topic, max_results=count)
+    
+    # Extract text from posts
+    return [post.text for post in posts]
