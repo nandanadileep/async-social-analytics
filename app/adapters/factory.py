@@ -8,6 +8,7 @@ social media adapters.
 from typing import Dict, Type, Optional
 from app.adapters.base import SocialMediaAdapter
 from app.adapters.twitter import TwitterAdapter
+from app.adapters.socialdata import SocialDataAdapter
 
 
 class AdapterFactory:
@@ -21,6 +22,7 @@ class AdapterFactory:
     _adapters: Dict[str, Type[SocialMediaAdapter]] = {
         "twitter": TwitterAdapter,
         "x": TwitterAdapter,  # Alias for Twitter
+        "socialdata": SocialDataAdapter,
     }
     
     @classmethod

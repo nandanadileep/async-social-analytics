@@ -33,13 +33,19 @@ def process_batch():
         payload = entry["payload"]
         topic = payload["topic"]
 
-        # Try to fetch real data from Twitter adapter
+        # Try to fetch real data
         try:
             import asyncio
+            import os
             from app.adapters.factory import get_adapter
             
-            # Create Twitter adapter
-            adapter = get_adapter('twitter')
+            # Prioritize SocialData.tools if key is present (cheaper/unofficial)
+            if os.getenv("SOCIALDATA_API_KEY"):
+                adapter = get_adapter('socialdata')
+                platform_name = "SocialData"
+            else:
+                adapter = get_adapter('twitter')
+                platform_name = "Twitter (Official)"
             
             # Fetch posts asynchronously
             social_posts = asyncio.run(adapter.fetch_posts(topic, max_results=120))
@@ -47,10 +53,13 @@ def process_batch():
             # Extract text from SocialPost objects
             posts = [post.text for post in social_posts]
             
-            print(f"✅ Fetched {len(posts)} posts from Twitter adapter for topic: {topic}")
+            if not posts:
+                raise Exception("No posts returned from adapter")
+
+            print(f"✅ Fetched {len(posts)} posts from {platform_name} adapter for topic: {topic}")
         except Exception as e:
             # Fallback to mock data if adapter fails
-            print(f"⚠️ Adapter failed, using mock data: {e}")
+            print(f"⚠️ Adapter ({platform_name if 'platform_name' in locals() else 'Unknown'}) failed: {e}")
             posts = generate_mock_posts(topic, count=120)
 
         sentiment = analyze_sentiments(posts)

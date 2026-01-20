@@ -66,16 +66,38 @@ class TwitterAdapter(SocialMediaAdapter):
         Fetch tweets matching the search query.
         
         Args:
-            query: Twitter search query (supports operators like #hashtag, @mention, etc.)
-            max_results: Maximum tweets to fetch (10-100 per request for free tier)
-            start_time: Filter tweets after this time (last 7 days for free tier)
+            query: Twitter search query
+            max_results: Maximum tweets to fetch
+            start_time: Filter tweets after this time
             end_time: Filter tweets before this time
             
         Returns:
             List of standardized SocialPost objects
         """
-        # For now, return mock data
-        # In production, this would make actual API calls
+        if self.bearer_token and self.bearer_token != "your_bearer_token_here":
+            try:
+                # Use real API if token is configured
+                response = await self._make_api_request(query, max_results, start_time, end_time)
+                
+                # Check for errors in response
+                if "errors" in response and not "data" in response:
+                    print(f"⚠️ Twitter API Error: {response['errors']}")
+                    return await self._fetch_mock_posts(query, max_results)
+
+                # Normalize posts
+                posts = []
+                for raw_post in response.get('data', []):
+                    # Pass the includes (users, etc) to helping normalization if needed, 
+                    # but for now we'll stick to basic normalization
+                    # Ideally normalization should look up user info from 'includes'
+                    posts.append(self.normalize_post(raw_post))
+                
+                return posts
+            except Exception as e:
+                print(f"⚠️ API Request failed ({e}), falling back to mock data.")
+                return await self._fetch_mock_posts(query, max_results)
+        
+        # Fallback to mock data if no token
         return await self._fetch_mock_posts(query, max_results)
     
     async def _fetch_mock_posts(self, query: str, max_results: int) -> List[SocialPost]:
